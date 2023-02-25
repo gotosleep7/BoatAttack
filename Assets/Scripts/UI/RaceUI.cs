@@ -20,6 +20,7 @@ namespace BoatAttack.UI
 
         public RectTransform map;
         public GameObject gameplayUi;
+        public GameObject nameUi;
         public GameObject raceStat;
         public GameObject matchEnd;
 
@@ -99,7 +100,7 @@ namespace BoatAttack.UI
         private IEnumerator CreateGameStats()
         {
             _raceStats = new RaceStatsPlayer[RaceManager.RaceData.boatCount];
-            for(var i = 0; i < RaceManager.RaceData.boatCount; i++)
+            for (var i = 0; i < RaceManager.RaceData.boatCount; i++)
             {
                 var raceStatLoading = raceStatsPlayer.InstantiateAsync(raceStat.transform);
                 yield return raceStatLoading;
@@ -115,7 +116,8 @@ namespace BoatAttack.UI
             {
                 if (i == player) continue;
 
-                var markerLoading = playerMarker.InstantiateAsync(gameplayUi.transform);
+                // var markerLoading = playerMarker.InstantiateAsync(gameplayUi.transform);
+                var markerLoading = playerMarker.InstantiateAsync(nameUi.transform);
                 yield return markerLoading; // wait for marker to load
 
                 markerLoading.Result.name += RaceManager.RaceData.boats[i].boatName;
