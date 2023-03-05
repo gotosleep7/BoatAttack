@@ -1,5 +1,7 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Users;
 
 namespace BoatAttack
 {
@@ -14,21 +16,96 @@ namespace BoatAttack
         private float _steering;
 
         private bool _paused;
-        
+
+        public InputUserAndGamepad inputUser;
+
+
+        [SerializeField]
+        private int _playerIndex;
+
+
+        public int PlayerIndex { get { return _playerIndex; } set { _playerIndex = value; } }
+        private int DeviceId;
         private void Awake()
         {
             _controls = new InputControls();
-            
-            _controls.BoatControls.Trottle.performed += context => _throttle = context.ReadValue<float>();
-            _controls.BoatControls.Trottle.canceled += context => _throttle = 0f;
-            
-            _controls.BoatControls.Steering.performed += context => _steering = context.ReadValue<float>();
-            _controls.BoatControls.Steering.canceled += context => _steering = 0f;
+        }
+        /// <summary>
+        /// Start is called on the frame when a script is enabled just before
+        /// any of the Update methods is called the first time.
+        /// </summary>
+        private void Start()
+        {
+            if (PlayerIndex == 0)
+            {
+                inputUser = TestInputManager.Instance.player1;
+                inputUser.playerIndex = 0;
+            }
+            if (PlayerIndex == 1)
+            {
+                inputUser = TestInputManager.Instance.player2;
+                inputUser.playerIndex = 1;
+            }
+            inputUser.InputUserInfo.AssociateActionsWithUser(_controls);
+            _controls.BoatControls.Trottle.performed += (context) =>
+            {
+                if (IsMe(context.control.device.deviceId))
+                {
+                    _throttle = context.ReadValue<float>();
+                }
+            };
+            _controls.BoatControls.Trottle.canceled += context =>
+            {
+                if (IsMe(context.control.device.deviceId)) _throttle = 0f;
+            };
+
+            _controls.BoatControls.Steering.performed += context =>
+            {
+                if (IsMe(context.control.device.deviceId))
+                {
+                    _steering = context.ReadValue<float>();
+                }
+            };
+            _controls.BoatControls.Steering.canceled += context =>
+            {
+                if (IsMe(context.control.device.deviceId)) _steering = 0f;
+            };
 
             _controls.BoatControls.Reset.performed += ResetBoat;
             _controls.BoatControls.Pause.performed += FreezeBoat;
 
             _controls.DebugControls.TimeOfDay.performed += SelectTime;
+
+            ScreenControlEvent.Instance.ScreenOperateEvent += OnScreenOperateEvent;
+
+
+        }
+
+        private void OnScreenOperateEvent(object sender, ScreenControlEvent.ScreenControlEventArgs e)
+        {
+            if (e.playerIndex != PlayerIndex) return;
+            switch (e.type)
+            {
+                case CustomScreenOparateType.Steering:
+                    _steering = e.value;
+                    break;
+                case CustomScreenOparateType.Reset:
+                    //reset
+                    controller.ResetPosition();
+                    break;
+                case CustomScreenOparateType.Throttle:
+                    _throttle = e.value;
+                    break;
+            }
+        }
+
+        public bool IsMe(int deviceId)
+        {
+            if (inputUser.playerIndex == PlayerIndex && inputUser.CheckDeviceById(deviceId))
+            {
+                return true;
+            }
+            return false;
         }
 
         public override void OnEnable()
@@ -50,7 +127,7 @@ namespace BoatAttack
         private void FreezeBoat(InputAction.CallbackContext context)
         {
             _paused = !_paused;
-            if(_paused)
+            if (_paused)
             {
                 Time.timeScale = 0f;
             }
@@ -59,6 +136,8 @@ namespace BoatAttack
                 Time.timeScale = 1f;
             }
         }
+
+
 
         private void SelectTime(InputAction.CallbackContext context)
         {
@@ -72,6 +151,9 @@ namespace BoatAttack
             engine.Accelerate(_throttle);
             engine.Turn(_steering);
         }
+
+
+
     }
 }
 

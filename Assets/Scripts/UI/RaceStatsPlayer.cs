@@ -40,13 +40,13 @@ namespace BoatAttack.UI
         {
             _place = _boat.Place;
             transform.SetSiblingIndex(_place + 1);
-            place.text = RaceUI.OrdinalNumber(_boat.Place);
+            place.text = RaceUIUtil.OrdinalNumber(_boat.Place);
 
-            var bestLapTime = RaceUI.BestLapFromSplitTimes(_boat.SplitTimes);
-            bestLap.text = bestLapTime > 0 ? RaceUI.FormatRaceTime(bestLapTime) : "N/A";
+            var bestLapTime = RaceUIUtil.BestLapFromSplitTimes(_boat.SplitTimes);
+            bestLap.text = bestLapTime > 0 ? RaceUIUtil.FormatRaceTime(bestLapTime) : "N/A";
 
             var totalTime = _boat.MatchComplete ? _boat.SplitTimes.Last() : RaceManager.RaceTime;
-            time.text = RaceUI.FormatRaceTime(totalTime);
+            time.text = RaceUIUtil.FormatRaceTime(totalTime);
         }
     }
 }

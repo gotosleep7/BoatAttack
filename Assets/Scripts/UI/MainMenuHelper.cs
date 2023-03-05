@@ -40,9 +40,36 @@ namespace BoatAttack.UI
             UpdateBoatColor(boatTrimColorSelector.CurrentOption, false);
         }
 
+        private void SetupMuliDefaults()
+        {
+            // level stuff
+            SetLevel(levelSelector.CurrentOption);
+            SetLaps(lapSelector.CurrentOption);
+            SetReverse(reverseSelector.CurrentOption);
+            // boat stuff
+            SetMuliPlayerName(boatName.text);
+            // UpdateBoat(0);
+            UpdateBoatWithMuliplayer();
+            UpdateBoatColor(boatPrimaryColorSelector.CurrentOption, true);
+            UpdateBoatColor(boatTrimColorSelector.CurrentOption, false);
+        }
+        private void UpdateBoatWithMuliplayer()
+        {
+            UpdateBoat(0, 0);
+            UpdateBoat(1, 1);
+        }
+
         private void UpdateBoat(int index)
         {
             RaceManager.SetHull(0, index);
+            for (var i = 0; i < boatMeshes.Length; i++)
+            {
+                boatMeshes[i].SetActive(i == index);
+            }
+        }
+        private void UpdateBoat(int userIndex, int index)
+        {
+            RaceManager.SetHull(userIndex, index);
             for (var i = 0; i < boatMeshes.Length; i++)
             {
                 boatMeshes[i].SetActive(i == index);
@@ -53,6 +80,11 @@ namespace BoatAttack.UI
         {
             RaceManager.SetGameType(RaceManager.GameType.Singleplayer);
             SetupDefaults();
+        }
+        public void SetupMuliplayerGame()
+        {
+            RaceManager.SetGameType(RaceManager.GameType.LocalMultiplayer);
+            SetupMuliDefaults();
         }
 
         public void SetupSpectatorGame()
@@ -70,6 +102,17 @@ namespace BoatAttack.UI
         public void StartRace() => RaceManager.LoadGame();
 
         public void SetSinglePlayerName(string playerName) => RaceManager.RaceData.boats[0].boatName = playerName;
+        public void SetMuliPlayerName(string playerName)
+        {
+
+            for (int i = 0; i < RaceManager.RaceData.boats.Count; i++)
+            {
+                if (RaceManager.RaceData.boats[i].human)
+                {
+                    RaceManager.RaceData.boats[i].boatName = playerName + i;
+                }
+            }
+        }
 
         private void UpdatePrimaryColor(int index) => UpdateBoatColor(index, true);
 
@@ -86,7 +129,7 @@ namespace BoatAttack.UI
             {
                 RaceManager.RaceData.boats[0].livery.trimColor = ConstantData.GetPaletteColor(index);
             }
-            
+
             // update menu boats
             foreach (var t in boatMeshes)
             {

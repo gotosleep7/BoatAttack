@@ -51,7 +51,7 @@ namespace BoatAttack
                     var i = 0;
                     foreach (var split in boat.SplitTimes)
                     {
-                        EditorGUILayout.LabelField($"Split {i}:", RaceUI.FormatRaceTime(split));
+                        EditorGUILayout.LabelField($"Split {i}:", RaceUIUtil.FormatRaceTime(split));
                         i++;
                     }
                 }

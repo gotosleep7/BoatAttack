@@ -143,6 +143,11 @@ MonoBehaviour:
     m_SubObjectName: 
     m_SubObjectType: 
     m_EditorAssetChanged: 0
+  raceUiTouchPrefabMutil:
+    m_AssetGUID: 75993ea6365f659469b57131f468fb95
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
 --- !u!114 &7312333174115242941
 MonoBehaviour:
   m_ObjectHideFlags: 0

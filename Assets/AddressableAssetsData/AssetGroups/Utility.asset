@@ -29,6 +29,10 @@ MonoBehaviour:
     m_Address: Assets/Objects/environment/Clouds/Shader Graphs_Clouds.mat
     m_ReadOnly: 0
     m_SerializedLabels: []
+  - m_GUID: 75993ea6365f659469b57131f468fb95
+    m_Address: Assets/Objects/UI/prefabs/InGame/Race_Canvas_touch_mutil.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 46fc3d082b08c4dacacae72d7016c235, type: 2}
   m_SchemaSet:

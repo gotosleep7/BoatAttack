@@ -26,7 +26,7 @@ namespace BoatAttack
 
         private WaypointGroup.Waypoint[] _wPs;
 
-        private void Start ()
+        private void Start()
         {
             RaceManager.raceStarted += StartRace;
         }
@@ -45,10 +45,10 @@ namespace BoatAttack
 
         private void LateUpdate()
         {
-            if(NavPath?.status == NavMeshPathStatus.PathInvalid)
+            if (NavPath?.status == NavMeshPathStatus.PathInvalid)
                 CalculatePath();
 
-            if (_pathPoint != null &&_pathPoint.Length > _curPoint && _foundPath)
+            if (_pathPoint != null && _pathPoint.Length > _curPoint && _foundPath)
             {
                 // If we are close to the current point on the path get the next
                 if (Vector3.Distance(transform.position, _pathPoint[_curPoint]) < 8)
@@ -59,7 +59,7 @@ namespace BoatAttack
                 }
             }
 
-            if(RaceManager.RaceStarted)
+            if (RaceManager.RaceStarted)
             {
                 if (_idleTime > 3f) // if been idle for 3 seconds assume AI is stuck
                 {
@@ -72,7 +72,7 @@ namespace BoatAttack
         }
 
         // Update is called once per frame
-        private void FixedUpdate ()
+        private void FixedUpdate()
         {
             if (_pathPoint == null || _pathPoint.Length <= _curPoint) return;
             //\\\\\\\\Get angle to the destination and the side
@@ -106,7 +106,7 @@ namespace BoatAttack
                 _curPoint = 1;
                 _foundPath = true;
             }
-            else if(NavPath == null || NavPath.status == NavMeshPathStatus.PathInvalid) // if the path is bad, we haven't found a path
+            else if (NavPath == null || NavPath.status == NavMeshPathStatus.PathInvalid) // if the path is bad, we haven't found a path
             {
                 _foundPath = false;
             }
@@ -135,14 +135,14 @@ namespace BoatAttack
         {
             var c = Color.yellow;
             Gizmos.color = c;
-
-            for (var i = 0; i < _pathPoint.Length - 1; i++)
-            {
-                if (i == _pathPoint.Length - 1)
-                    Gizmos.DrawLine(_pathPoint[_pathPoint.Length - 1], _pathPoint[i]);
-                else
-                    Gizmos.DrawLine(_pathPoint[i], _pathPoint[i + 1]);
-            }
+            if (_pathPoint != null)
+                for (var i = 0; i < _pathPoint.Length - 1; i++)
+                {
+                    if (i == _pathPoint.Length - 1)
+                        Gizmos.DrawLine(_pathPoint[_pathPoint.Length - 1], _pathPoint[i]);
+                    else
+                        Gizmos.DrawLine(_pathPoint[i], _pathPoint[i + 1]);
+                }
         }
     }
 }

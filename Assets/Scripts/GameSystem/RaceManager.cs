@@ -66,6 +66,7 @@ namespace BoatAttack
         [Header("Assets")] public AssetReference[] boats;
         public AssetReference raceUiPrefab;
         public AssetReference raceUiTouchPrefab;
+        public AssetReference raceUiTouchPrefabMutil;
 
         public static void BoatFinished(int player)
         {
@@ -74,14 +75,21 @@ namespace BoatAttack
                 case GameType.Singleplayer:
                     if (player == 0)
                     {
-                        var raceUi = RaceData.boats[0].Boat.RaceUi;
+                        var raceUi = (RaceUI)RaceData.boats[0].Boat.RaceUi;
                         raceUi.MatchEnd();
                         ReplayCamera.Instance.EnableSpectatorMode();
                     }
                     break;
                 case GameType.LocalMultiplayer:
+                    if (player == 0 || player == 1)
+                    {
+                        var raceUi = (RaceUIMutil)RaceData.boats[0].Boat.RaceUi;
+                        raceUi.MatchEnd();
+                        ReplayCamera.Instance.EnableSpectatorMode();
+                    }
                     break;
                 case GameType.Multiplayer:
+
                     break;
                 case GameType.Spectator:
                     break;
@@ -130,6 +138,8 @@ namespace BoatAttack
                     SetupCamera(0); // setup camera for player 1
                     break;
                 case GameType.LocalMultiplayer:
+                    yield return Instance.StartCoroutine(CreateMuliPlayerUi());
+                    SetupCamera(0); // setup camera for player 1
                     break;
                 case GameType.Multiplayer:
                     break;
@@ -163,13 +173,22 @@ namespace BoatAttack
                     var b = new BoatData();
                     b.human = true; // single player is human
                     RaceData.boats.Add(b); // add player boat
+                    // var a = new BoatData();
+                    // a.human = true; // single player is human
+                    // RaceData.boats.Add(a); // add player boat
                     GenerateRandomBoats(RaceData.boatCount - 1); // add random AI
                     break;
                 case GameType.Spectator:
                     GenerateRandomBoats(RaceData.boatCount);
                     break;
                 case GameType.LocalMultiplayer:
-                    Debug.LogError("Not Implemented");
+                    var p1 = new BoatData();
+                    p1.human = true; // single player is human
+                    var p2 = new BoatData();
+                    p2.human = true; // single player is human
+                    RaceData.boats.Add(p1); // add player boat
+                    RaceData.boats.Add(p2); // add player boat
+                    GenerateRandomBoats(RaceData.boatCount - 2); // add random AI
                     break;
                 case GameType.Multiplayer:
                     Debug.LogError("Not Implemented");
@@ -229,6 +248,7 @@ namespace BoatAttack
                     SetupCamera(0, true);
                     break;
                 case GameType.LocalMultiplayer:
+                    UnloadRace();
                     break;
                 case GameType.Multiplayer:
                     break;
@@ -275,6 +295,7 @@ namespace BoatAttack
 
         public static void LoadGame()
         {
+            Debug.Log($"RaceData.level={RaceData.level}");
             AppSettings.LoadScene(RaceData.level);
             SceneManager.sceneLoaded += Setup;
         }
@@ -352,6 +373,21 @@ namespace BoatAttack
                 var boatData = RaceData.boats[player];
                 boatData.Boat.RaceUi = uiComponent;
                 uiComponent.Setup(player);
+            }
+        }
+
+        private static IEnumerator CreateMuliPlayerUi()
+        {
+            var uiAsset = Instance.raceUiTouchPrefabMutil;
+            var uiLoading = uiAsset.InstantiateAsync();
+            yield return uiLoading;
+            if (uiLoading.Result.TryGetComponent(out RaceUIMutil uiComponent))
+            {
+                var boatData0 = RaceData.boats[0];
+                var boatData1 = RaceData.boats[1];
+                boatData0.Boat.RaceUi = uiComponent;
+                boatData1.Boat.RaceUi = uiComponent;
+                uiComponent.Setup(0, 1);
             }
         }
 

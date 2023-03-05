@@ -33,19 +33,32 @@ namespace BoatAttack
 
         public CinemachineVirtualCamera cam;
         private float _camFovVel;
-        [NonSerialized] public RaceUI RaceUi;
+        [NonSerialized] public IRaceUI RaceUi;
         private Object _controller;
-        private int _playerIndex;
+        private int _playerIndex = -1;
+        public int PlayerIndex
+        {
+            get
+            {
+                return _playerIndex;
+            }
+            set
+            {
+                _playerIndex = value;
+            }
+        }
 
         // Shader Props
         private static readonly int LiveryPrimary = Shader.PropertyToID("_Color1");
         private static readonly int LiveryTrim = Shader.PropertyToID("_Color2");
 
+
         // debug
         [SerializeField] internal bool debugControl = false;
 
+
         private void Awake()
-		{
+        {
             if (debugControl)
             {
                 Setup(1, true, RandomLivery());
@@ -76,6 +89,10 @@ namespace BoatAttack
             {
                 _controller = gameObject.AddComponent(controllerType);
             }
+            if (isHuman)
+            {
+                ((HumanController)_controller).PlayerIndex = _playerIndex;
+            }
         }
 
         private void Update()
@@ -83,11 +100,12 @@ namespace BoatAttack
             if (RaceManager.RaceStarted)
             {
                 UpdateLaps();
+                // 做事件
 
-                if (RaceUi)
+                if (RaceUi != null)
                 {
-                    RaceUi.UpdatePlaceCounter(Place);
-                    RaceUi.UpdateSpeed(engine.VelocityMag);
+                    RaceUi.UpdatePlaceCounter(Place, _playerIndex);
+                    RaceUi.UpdateSpeed(engine.VelocityMag, _playerIndex);
                 }
             }
         }
@@ -105,7 +123,7 @@ namespace BoatAttack
         {
             if (!RaceManager.RaceStarted)
             {
-                if(WaypointGroup.Instance) AlignBoatWithStartingLine();
+                if (WaypointGroup.Instance) AlignBoatWithStartingLine();
             }
         }
 
@@ -131,10 +149,10 @@ namespace BoatAttack
             var lowPercentage = _lastCheckpoint?.normalizedDistance ?? 0f;
             var highPercentage = _nextCheckpoint?.normalizedDistance ?? 1f;
             LapPercentage = Mathf.Clamp(LapPercentage, lowPercentage, highPercentage <= 0.001f ? 1f : highPercentage);
-
-            if (RaceUi)
+            // TODO update ui
+            if (RaceUi != null)
             {
-                RaceUi.UpdateLapCounter(LapCount);
+                RaceUi.UpdateLapCounter(LapCount, _playerIndex);
             }
         }
 
@@ -156,7 +174,7 @@ namespace BoatAttack
         private void EnteredWaypoint(int index, bool checkpoint)
         {
             var count = WaypointGroup.Instance.WPs.Count;
-            var nextWp = (int) Mathf.Repeat(_wpCount + 1, count);
+            var nextWp = (int)Mathf.Repeat(_wpCount + 1, count);
 
             if (nextWp != index) return;
             _wpCount = nextWp;
@@ -166,8 +184,8 @@ namespace BoatAttack
             SplitTimes.Add(RaceManager.RaceTime);
 
             if (LapCount <= RaceManager.GetLapCount()) return;
-            
-            Debug.Log($"Boat {name} finished {RaceUI.OrdinalNumber(Place)} with time:{RaceUI.FormatRaceTime(SplitTimes.Last())}");
+
+            Debug.Log($"Boat {name} finished {RaceUIUtil.OrdinalNumber(Place)} with time:{RaceUIUtil.FormatRaceTime(SplitTimes.Last())}");
             RaceManager.BoatFinished(_playerIndex);
             MatchComplete = true;
 

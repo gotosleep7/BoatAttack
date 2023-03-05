@@ -8,21 +8,14 @@ using UnityEngine.SceneManagement;
 
 namespace BoatAttack.UI
 {
-    public interface IRaceUI
-    {
-        public void UpdatePlaceCounter(int place, int playerIndex);
-        public void UpdateSpeed(float velocity, int playerIndex);
-        public void UpdateLapCounter(int lap, int playerIndex);
-        public void MatchEnd();
-    }
-    public class RaceUI : MonoBehaviour, IRaceUI
+    public class RaceUIMutil : MonoBehaviour, IRaceUI
     {
         private Boat _boat;
-        public TextMeshProUGUI lapCounter;
-        public TextMeshProUGUI positionNumber;
+
+        private Boat _boat2;
+
         public TextMeshProUGUI timeTotal;
-        public TextMeshProUGUI timeLap;
-        public TextMeshProUGUI speedText;
+
         public TextMeshProUGUI speedFormatText;
 
         public RectTransform map;
@@ -31,29 +24,45 @@ namespace BoatAttack.UI
         public GameObject raceStat;
         public GameObject matchEnd;
 
+        [Header("player1")]
+        public TextMeshProUGUI speedText;
+        public TextMeshProUGUI timeLap;
+        public TextMeshProUGUI lapCounter;
+        public TextMeshProUGUI positionNumber;
+
+        [Header("player2")]
+        public TextMeshProUGUI speedText2;
+        public TextMeshProUGUI timeLap2;
+        public TextMeshProUGUI lapCounter2;
+        public TextMeshProUGUI positionNumber2;
         [Header("Assets")]
         public AssetReference playerMarker;
         public AssetReference playerMapMarker;
         public AssetReference raceStatsPlayer;
-
         private int _playerIndex;
+        private int _playerIndex2;
         private int _totalLaps;
         private int _totalPlayers;
         private float _timeOffset;
         private float _smoothedSpeed;
+        private float _smoothedSpeed2;
         private float _smoothSpeedVel;
+        private float _smoothSpeedVel2;
         private AppSettings.SpeedFormat _speedFormat;
         private RaceStatsPlayer[] _raceStats;
+
 
         private void OnEnable()
         {
             RaceManager.raceStarted += SetGameplayUi;
         }
 
-        public void Setup(int player)
+        public void Setup(int player1, int player2)
         {
-            _playerIndex = player;
+            _playerIndex = player1;
+            _playerIndex2 = player2;
             _boat = RaceManager.RaceData.boats[_playerIndex].Boat;
+            _boat2 = RaceManager.RaceData.boats[_playerIndex].Boat;
             _totalLaps = RaceManager.GetLapCount();
             _totalPlayers = RaceManager.RaceData.boats.Count;
             _timeOffset = Time.time;
@@ -70,7 +79,7 @@ namespace BoatAttack.UI
                     break;
             }
 
-            StartCoroutine(SetupPlayerMarkers(player));
+            StartCoroutine(SetupPlayerMarkers(player1));
             StartCoroutine(SetupPlayerMapMarkers());
             StartCoroutine(CreateGameStats());
         }
@@ -144,15 +153,29 @@ namespace BoatAttack.UI
                     pm.Setup(boatData);
             }
         }
-
         public void UpdateLapCounter(int lap, int playerIndex)
         {
-            lapCounter.text = $"{lap}/{_totalLaps}";
+            if (playerIndex == _playerIndex)
+            {
+                lapCounter.text = $"{lap}/{_totalLaps}";
+            }
+            else if (playerIndex == _playerIndex2)
+            {
+                lapCounter2.text = $"{lap}/{_totalLaps}";
+            }
+
         }
 
         public void UpdatePlaceCounter(int place, int playerIndex)
         {
-            positionNumber.text = $"{place}/{_totalPlayers}";
+            if (playerIndex == _playerIndex)
+            {
+                positionNumber.text = $"{place}/{_totalPlayers}";
+            }
+            else if (playerIndex == _playerIndex2)
+            {
+                positionNumber2.text = $"{place}/{_totalPlayers}";
+            }
         }
 
         public void UpdateSpeed(float velocity, int playerIndex)
@@ -169,8 +192,17 @@ namespace BoatAttack.UI
                     break;
             }
 
-            _smoothedSpeed = Mathf.SmoothDamp(_smoothedSpeed, speed, ref _smoothSpeedVel, 1f);
-            speedText.text = _smoothedSpeed.ToString("000");
+            if (playerIndex == _playerIndex)
+            {
+                _smoothedSpeed = Mathf.SmoothDamp(_smoothedSpeed, speed, ref _smoothSpeedVel, 1f);
+                speedText.text = _smoothedSpeed.ToString("000");
+
+            }
+            else if (playerIndex == _playerIndex2)
+            {
+                _smoothedSpeed2 = Mathf.SmoothDamp(_smoothedSpeed2, speed, ref _smoothSpeedVel2, 1f);
+                speedText2.text = _smoothedSpeed2.ToString("000");
+            }
         }
 
         public void FinishMatch()
@@ -185,42 +217,9 @@ namespace BoatAttack.UI
 
             var l = (_boat.SplitTimes.Count > 0) ? rawTime - _boat.SplitTimes[_boat.LapCount - 1] : 0f;
             timeLap.text = $"lap {RaceUIUtil.FormatRaceTime(l)}";
+            var l2 = (_boat2.SplitTimes.Count > 0) ? rawTime - _boat2.SplitTimes[_boat2.LapCount - 1] : 0f;
+            timeLap2.text = $"lap {RaceUIUtil.FormatRaceTime(l2)}";
         }
 
-
-    }
-    public class RaceUIUtil
-    {
-        public static string FormatRaceTime(float seconds)
-        {
-            var t = TimeSpan.FromSeconds(seconds);
-            return $"{t.Minutes:D2}:{t.Seconds:D2}.{t.Milliseconds:D3}";
-        }
-
-        public static string OrdinalNumber(int num)
-        {
-            var number = num.ToString();
-            if (number.EndsWith("11")) return $"{number}th";
-            if (number.EndsWith("12")) return $"{number}th";
-            if (number.EndsWith("13")) return $"{number}th";
-            if (number.EndsWith("1")) return $"{number}st";
-            if (number.EndsWith("2")) return $"{number}nd";
-            if (number.EndsWith("3")) return $"{number}rd";
-            return $"{number}th";
-        }
-
-        public static float BestLapFromSplitTimes(List<float> splits)
-        {
-            // ignore 0 as it's the beginning of the race
-            if (splits.Count <= 1) return 0;
-            var fastestLap = Mathf.Infinity;
-
-            for (var i = 1; i < splits.Count; i++)
-            {
-                var lap = splits[i] - splits[i - 1];
-                fastestLap = lap < fastestLap ? lap : fastestLap;
-            }
-            return fastestLap;
-        }
     }
 }
