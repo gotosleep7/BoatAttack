@@ -92,6 +92,7 @@ namespace BoatAttack
             if (isHuman)
             {
                 ((HumanController)_controller).PlayerIndex = _playerIndex;
+
             }
         }
 

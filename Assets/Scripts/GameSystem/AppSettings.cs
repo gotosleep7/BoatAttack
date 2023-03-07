@@ -41,6 +41,7 @@ namespace BoatAttack
         public static AppSettings Instance;
         private GameObject loadingScreenObject;
         public static Camera MainCamera;
+
         [Header("Resolution Settings")]
         public RenderRes maxRenderSize = RenderRes._720p;
         public bool variableResolution;
@@ -62,14 +63,14 @@ namespace BoatAttack
         // Use this for initialization
         private void Awake()
         {
-            if(Debug.isDebugBuild)
+            if (Debug.isDebugBuild)
                 Debug.Log("AppManager initializing");
             Initialize();
             CmdArgs();
             SetRenderScale();
             SceneManager.sceneLoaded += LevelWasLoaded;
         }
-        
+
         private void Initialize()
         {
             Instance = this;
@@ -109,7 +110,7 @@ namespace BoatAttack
 
         private void CleanupLoadingScreen()
         {
-            if(loadingScreenObject) loadingScreen?.ReleaseInstance(loadingScreenObject);
+            if (loadingScreenObject) loadingScreen?.ReleaseInstance(loadingScreenObject);
         }
 
         private void SetRenderScale()
@@ -123,7 +124,7 @@ namespace BoatAttack
             };
             var renderScale = Mathf.Clamp(res / Screen.width, 0.1f, 1.0f);
 
-            if(Debug.isDebugBuild)
+            if (Debug.isDebugBuild)
                 Debug.Log($"Settings render scale to {renderScale * 100}% based on {maxRenderSize.ToString()}");
 
             maxScale = renderScale;
@@ -204,7 +205,7 @@ namespace BoatAttack
             DontDestroyOnLoad(Instance.loadingScreenObject);
 
             var buildIndex = SceneUtility.GetBuildIndexByScenePath(scenePath);
-            if(Debug.isDebugBuild)
+            if (Debug.isDebugBuild)
                 Debug.Log($"loading scene {scenePath} at build index {buildIndex}");
 
             // get current scene and set a loading scene as active
@@ -261,7 +262,7 @@ namespace BoatAttack
 
         public static void ExitGame(string s = "null")
         {
-            if(s != "null")
+            if (s != "null")
                 Debug.LogError(s);
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.ExitPlaymode();
@@ -276,7 +277,7 @@ namespace BoatAttack
             if (args.Length <= 0) return;
             foreach (var argRaw in args)
             {
-                if(string.IsNullOrEmpty(argRaw) || argRaw[0] != '-') continue;
+                if (string.IsNullOrEmpty(argRaw) || argRaw[0] != '-') continue;
                 var arg = argRaw.Split(':');
 
                 switch (arg[0])
@@ -350,7 +351,7 @@ namespace BoatAttack
             get
             {
                 GenerateColors();
-                Random.InitState(SeedNow+Random.Range(0,1000));
+                Random.InitState(SeedNow + Random.Range(0, 1000));
                 return ColorPalette[Random.Range(0, ColorPalette.Length)];
             }
         }

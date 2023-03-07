@@ -27,7 +27,7 @@ namespace BoatAttack.UI
 
         public RectTransform map;
         public GameObject gameplayUi;
-        public GameObject nameUi;
+        public GameObject p1NameUi;
         public GameObject raceStat;
         public GameObject matchEnd;
 
@@ -124,7 +124,7 @@ namespace BoatAttack.UI
                 if (i == player) continue;
 
                 // var markerLoading = playerMarker.InstantiateAsync(gameplayUi.transform);
-                var markerLoading = playerMarker.InstantiateAsync(nameUi.transform);
+                var markerLoading = playerMarker.InstantiateAsync(p1NameUi.transform);
                 yield return markerLoading; // wait for marker to load
 
                 markerLoading.Result.name += RaceManager.RaceData.boats[i].boatName;

@@ -63,10 +63,17 @@ namespace BoatAttack
 
         public static Action<bool> raceStarted;
 
-        [Header("Assets")] public AssetReference[] boats;
+        [Header("Assets")]
+        public AssetReference[] boats;
         public AssetReference raceUiPrefab;
         public AssetReference raceUiTouchPrefab;
         public AssetReference raceUiTouchPrefabMutil;
+        public AssetReference cameraPrefab;
+
+        [Header("Camera")]
+        public Camera player1Camera;
+        public Camera player2Camera;
+
 
         public static void BoatFinished(int player)
         {
@@ -139,7 +146,8 @@ namespace BoatAttack
                     break;
                 case GameType.LocalMultiplayer:
                     yield return Instance.StartCoroutine(CreateMuliPlayerUi());
-                    SetupCamera(0); // setup camera for player 1
+                    yield return Instance.StartCoroutine(CreateMutilCamera());
+                    SetupMutilCamera();
                     break;
                 case GameType.Multiplayer:
                     break;
@@ -393,11 +401,40 @@ namespace BoatAttack
 
         private static void SetupCamera(int player, bool remove = false)
         {
-            // Setup race camera
             if (remove)
                 AppSettings.MainCamera.cullingMask &= ~(1 << LayerMask.NameToLayer($"Player{player + 1}")); // TODO - this needs more work for when adding splitscreen.
             else
                 AppSettings.MainCamera.cullingMask |= 1 << LayerMask.NameToLayer($"Player{player + 1}"); // TODO - this needs more work for when adding splitscreen.
+        }
+        private static void SetupMutilCamera()
+        {
+            Instance.player1Camera.cullingMask |= 1 << LayerMask.NameToLayer($"Player1");
+            Instance.player1Camera.cullingMask |= 1 << LayerMask.NameToLayer($"Player1NameUI");
+            Instance.player2Camera.cullingMask |= 1 << LayerMask.NameToLayer($"Player2");
+            Instance.player2Camera.cullingMask |= 1 << LayerMask.NameToLayer($"Player2NameUI");
+            // Setup race camera
+            // if (remove)
+            //     AppSettings.MainCamera.cullingMask &= ~(1 << LayerMask.NameToLayer($"Player{player + 1}")); // TODO - this needs more work for when adding splitscreen.
+            // else
+            //     AppSettings.MainCamera.cullingMask |= 1 << LayerMask.NameToLayer($"Player{player + 1}"); // TODO - this needs more work for when adding splitscreen.
+        }
+        private static IEnumerator CreateMutilCamera()
+        {
+            var cameraAsset = Instance.cameraPrefab;
+            var cameraLoading = cameraAsset.InstantiateAsync();
+            var cameraLoading2 = cameraAsset.InstantiateAsync();
+            yield return cameraLoading;
+            if (cameraLoading.Result.TryGetComponent(out Camera c1))
+            {
+                Instance.player1Camera = c1;
+                Instance.player1Camera.rect = new Rect(0.2f, 0, 0.3f, 1);
+            }
+            if (cameraLoading2.Result.TryGetComponent(out Camera c2))
+            {
+                Instance.player2Camera = c2;
+                Instance.player2Camera.rect = new Rect(0.5f, 0, 0.3f, 1);
+            }
+
         }
 
         public static int GetLapCount()

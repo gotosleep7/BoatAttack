@@ -148,6 +148,13 @@ MonoBehaviour:
     m_SubObjectName: 
     m_SubObjectType: 
     m_EditorAssetChanged: 0
+  cameraPrefab:
+    m_AssetGUID: 7159c6fd84274f54584ed74763c5ff2b
+    m_SubObjectName: 
+    m_SubObjectType: 
+    m_EditorAssetChanged: 0
+  player1Camera: {fileID: 0}
+  player2Camera: {fileID: 0}
 --- !u!114 &7312333174115242941
 MonoBehaviour:
   m_ObjectHideFlags: 0
