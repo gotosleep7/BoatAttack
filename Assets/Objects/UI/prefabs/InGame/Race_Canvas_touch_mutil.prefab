@@ -4378,7 +4378,8 @@ MonoBehaviour:
   speedFormatText: {fileID: 7817162159332989510}
   map: {fileID: 8253369327575578091}
   gameplayUi: {fileID: 1663230441479953284}
-  nameUi: {fileID: 285032771176348260}
+  player1NameUI: {fileID: 285032771176348260}
+  player2NameUI: {fileID: 7052807277428889672}
   raceStat: {fileID: 6703963709383692879}
   matchEnd: {fileID: 8583329698896410406}
   speedText: {fileID: 2125751762303357890}

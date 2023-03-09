@@ -13,7 +13,7 @@ PlayerSettings:
   useOnDemandResources: 0
   accelerometerFrequency: 0
   companyName: UnityTechnologies
-  productName: BoatAttack
+  productName: HMIBoatAttack
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
   m_SplashScreenBackgroundColor: {r: 1, g: 1, b: 1, a: 1}
@@ -136,8 +136,19 @@ PlayerSettings:
     16:10: 1
     16:9: 1
     Others: 1
-  bundleVersion: 0.9
+  bundleVersion: 0.12
   preloadedAssets:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
@@ -160,9 +171,9 @@ PlayerSettings:
   androidSupportedAspectRatio: 1
   androidMaxAspectRatio: 2.1
   applicationIdentifier:
-    Android: com.Unity3d.BoatAttackDay
+    Android: com.UnityTechnologies.HMIBoatAttack1
     Lumin: com.DefaultCompany.BoatAttack
-    Standalone: com.UnityTechnologies.BoatAttack
+    Standalone: com.UnityTechnologies.HMIBoatAttack
     iPhone: com.Unity3D.BoatAttack
   buildNumber:
     Standalone: 0
@@ -862,7 +873,7 @@ PlayerSettings:
     4: URP;USE_CUSTOM_METADATA
     5: URP;USE_CUSTOM_METADATA
     6: URP;USE_CUSTOM_METADATA
-    7: URP;USE_CUSTOM_METADATA
+    7: 
     8: URP;USE_CUSTOM_METADATA
     9: URP;USE_CUSTOM_METADATA
     10: URP;USE_CUSTOM_METADATA

@@ -10,7 +10,7 @@ namespace BoatAttack
     /// </summary>
     public class HumanController : BaseController
     {
-        private InputControls _controls;
+        // private InputControls _controls;
 
         private float _throttle;
         private float _steering;
@@ -25,10 +25,10 @@ namespace BoatAttack
 
 
         public int PlayerIndex { get { return _playerIndex; } set { _playerIndex = value; } }
-        private int DeviceId;
         private void Awake()
         {
-            _controls = new InputControls();
+            // _controls = new InputControls();
+
         }
         /// <summary>
         /// Start is called on the frame when a script is enabled just before
@@ -46,36 +46,36 @@ namespace BoatAttack
                 inputUser = TestInputManager.Instance.player2;
                 inputUser.playerIndex = 1;
             }
-            inputUser.InputUserInfo.AssociateActionsWithUser(_controls);
-            _controls.BoatControls.Trottle.performed += (context) =>
+            inputUser.CurrnetController = new InputControls();
+
+            inputUser.CurrnetController.BoatControls.Trottle.performed += (context) =>
             {
                 if (IsMe(context.control.device.deviceId))
                 {
                     _throttle = context.ReadValue<float>();
                 }
             };
-            _controls.BoatControls.Trottle.canceled += context =>
+            inputUser.CurrnetController.BoatControls.Trottle.canceled += context =>
             {
                 if (IsMe(context.control.device.deviceId)) _throttle = 0f;
             };
 
-            _controls.BoatControls.Steering.performed += context =>
+            inputUser.CurrnetController.BoatControls.Steering.performed += context =>
             {
                 if (IsMe(context.control.device.deviceId))
                 {
                     _steering = context.ReadValue<float>();
                 }
             };
-            _controls.BoatControls.Steering.canceled += context =>
+            inputUser.CurrnetController.BoatControls.Steering.canceled += context =>
             {
                 if (IsMe(context.control.device.deviceId)) _steering = 0f;
             };
 
-            _controls.BoatControls.Reset.performed += ResetBoat;
-            _controls.BoatControls.Pause.performed += FreezeBoat;
+            inputUser.CurrnetController.BoatControls.Reset.performed += ResetBoat;
+            inputUser.CurrnetController.BoatControls.Pause.performed += FreezeBoat;
 
-            _controls.DebugControls.TimeOfDay.performed += SelectTime;
-
+            inputUser.CurrnetController.DebugControls.TimeOfDay.performed += SelectTime;
             ScreenControlEvent.Instance.ScreenOperateEvent += OnScreenOperateEvent;
 
 
@@ -111,12 +111,12 @@ namespace BoatAttack
         public override void OnEnable()
         {
             base.OnEnable();
-            _controls.BoatControls.Enable();
+            inputUser?.CurrnetController?.BoatControls.Enable();
         }
 
         private void OnDisable()
         {
-            _controls.BoatControls.Disable();
+            inputUser?.CurrnetController?.BoatControls.Disable();
         }
 
         private void ResetBoat(InputAction.CallbackContext context)

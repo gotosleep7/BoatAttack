@@ -14,23 +14,26 @@ namespace BoatAttack.UI
 
         private Boat _boat2;
 
-        public TextMeshProUGUI timeTotal;
+
 
         public TextMeshProUGUI speedFormatText;
 
         public RectTransform map;
         public GameObject gameplayUi;
-        public GameObject nameUi;
+        public GameObject player1NameUI;
+        public GameObject player2NameUI;
         public GameObject raceStat;
         public GameObject matchEnd;
 
         [Header("player1")]
+        public TextMeshProUGUI timeTotal;
         public TextMeshProUGUI speedText;
         public TextMeshProUGUI timeLap;
         public TextMeshProUGUI lapCounter;
         public TextMeshProUGUI positionNumber;
 
         [Header("player2")]
+        public TextMeshProUGUI timeTotal2;
         public TextMeshProUGUI speedText2;
         public TextMeshProUGUI timeLap2;
         public TextMeshProUGUI lapCounter2;
@@ -62,7 +65,7 @@ namespace BoatAttack.UI
             _playerIndex = player1;
             _playerIndex2 = player2;
             _boat = RaceManager.RaceData.boats[_playerIndex].Boat;
-            _boat2 = RaceManager.RaceData.boats[_playerIndex].Boat;
+            _boat2 = RaceManager.RaceData.boats[_playerIndex2].Boat;
             _totalLaps = RaceManager.GetLapCount();
             _totalPlayers = RaceManager.RaceData.boats.Count;
             _timeOffset = Time.time;
@@ -79,7 +82,8 @@ namespace BoatAttack.UI
                     break;
             }
 
-            StartCoroutine(SetupPlayerMarkers(player1));
+            StartCoroutine(SetupPlayerMarkers(player1, player1NameUI.transform));
+            StartCoroutine(SetupPlayerMarkers(player2, player2NameUI.transform));
             StartCoroutine(SetupPlayerMapMarkers());
             StartCoroutine(CreateGameStats());
         }
@@ -126,14 +130,14 @@ namespace BoatAttack.UI
             }
         }
 
-        private IEnumerator SetupPlayerMarkers(int player)
+        private IEnumerator SetupPlayerMarkers(int player, Transform parent)
         {
             for (int i = 0; i < RaceManager.RaceData.boats.Count; i++)
             {
                 if (i == player) continue;
 
                 // var markerLoading = playerMarker.InstantiateAsync(gameplayUi.transform);
-                var markerLoading = playerMarker.InstantiateAsync(nameUi.transform);
+                var markerLoading = playerMarker.InstantiateAsync(parent);
                 yield return markerLoading; // wait for marker to load
 
                 markerLoading.Result.name += RaceManager.RaceData.boats[i].boatName;
@@ -214,6 +218,7 @@ namespace BoatAttack.UI
         {
             var rawTime = RaceManager.RaceTime;
             timeTotal.text = $"time {RaceUIUtil.FormatRaceTime(rawTime)}";
+            timeTotal2.text = $"time {RaceUIUtil.FormatRaceTime(rawTime)}";
 
             var l = (_boat.SplitTimes.Count > 0) ? rawTime - _boat.SplitTimes[_boat.LapCount - 1] : 0f;
             timeLap.text = $"lap {RaceUIUtil.FormatRaceTime(l)}";

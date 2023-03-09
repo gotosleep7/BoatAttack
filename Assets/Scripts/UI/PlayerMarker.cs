@@ -47,12 +47,17 @@ namespace BoatAttack.UI
         private void UpdatePosition(ScriptableRenderContext context, Camera[] cameras)
         {
             Camera c = null;
-            if (gameObject.layer == LayerMask.NameToLayer("Player1"))
+            if (transform.parent.gameObject.layer == LayerMask.NameToLayer("Player1NameUI"))
             {
                 c = RaceManager.Instance.player1Camera;
             }
-            if (_boatData == null || Camera.main == null) return; // if no boat or camera, the player marker cannot work
-            var screenPos = Camera.main.WorldToViewportPoint(_boatData.BoatObject.transform.position + Vector3.up * 3f);
+            else if (transform.parent.gameObject.layer == LayerMask.NameToLayer("Player2NameUI"))
+            {
+                c = RaceManager.Instance.player2Camera;
+            }
+
+            if (_boatData == null || c == null) return; // if no boat or camera, the player marker cannot work
+            var screenPos = c.WorldToViewportPoint(_boatData.BoatObject.transform.position + Vector3.up * 3f);
             if (screenPos.z < 0)
             {
                 screenPos = -Vector3.one;

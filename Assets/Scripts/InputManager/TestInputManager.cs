@@ -6,28 +6,28 @@ using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.OnScreen;
 using UnityEngine.InputSystem.Users;
 
-public class TestInputManager : MonoBehaviour
+public class TestInputManager
 {
-    public static TestInputManager Instance;
+    private static TestInputManager _instance;
+    public static TestInputManager Instance
+    {
+        get
+        {
+            if (_instance == null) _instance = new TestInputManager();
+            return _instance;
+        }
+    }
 
     public InputUserAndGamepad player1;
     public int player1Index = 0;
     public InputUserAndGamepad player2;
     public int player2Index = 1;
     Type gamepadType = typeof(UnityEngine.InputSystem.Gamepad);
-    /// <summary>
-    /// Awake is called when the script instance is being loaded.
-    /// </summary>
-    private void Awake()
-    {
-        if (Instance != null)
-        {
-            Destroy(Instance);
-            return;
-        }
-        Instance = this;
-        DontDestroyOnLoad(Instance);
 
+
+
+    private TestInputManager()
+    {
         player1 = new InputUserAndGamepad(InputUser.CreateUserWithoutPairedDevices());
         player2 = new InputUserAndGamepad(InputUser.CreateUserWithoutPairedDevices());
         Debug.Log($"Gamepad.all.Count=={Gamepad.all.Count}");
@@ -45,10 +45,11 @@ public class TestInputManager : MonoBehaviour
     /// <summary>
     /// This function is called when the MonoBehaviour will be destroyed.
     /// </summary>
-    private void OnDestroy()
+    private void Destroy()
     {
         player1.InputUserInfo.UnpairDevicesAndRemoveUser();
         player2.InputUserInfo.UnpairDevicesAndRemoveUser();
+        InputSystem.onDeviceChange -= OnDeviceChange;
     }
 
     private void OnDeviceChange(InputDevice device, InputDeviceChange state)
@@ -68,20 +69,31 @@ public class TestInputManager : MonoBehaviour
                 player2.RemoveDevice();
             }
         }
-        else if (state == InputDeviceChange.Added || state == InputDeviceChange.Reconnected)
+        else if (state == InputDeviceChange.Reconnected)
         {
-            player1.TrySetDevice((Gamepad)device);
-            player2.TrySetDevice((Gamepad)device);
+            // bool isReconnect = state == InputDeviceChange.Reconnected;
+            if (player1.Device == null)
+            {
+                player1.TryReconnectDevice((Gamepad)device);
+            }
+            else if (player2.Device == null)
+            {
+                player2.TryReconnectDevice((Gamepad)device);
+            }
+        }
+        else if (state == InputDeviceChange.Added)
+        {
+            // bool isReconnect = state == InputDeviceChange.Reconnected;
+            if (player1.Device == null)
+            {
+                player1.TrySetDevice((Gamepad)device);
+            }
+            else if (player2.Device == null)
+            {
+                player2.TrySetDevice((Gamepad)device);
+            }
         }
 
-    }
-
-    /// <summary>
-    /// This function is called when the behaviour becomes disabled or inactive.
-    /// </summary>
-    private void OnDisable()
-    {
-        InputSystem.onDeviceChange -= OnDeviceChange;
     }
 }
 
@@ -91,23 +103,36 @@ public class InputUserAndGamepad
     public int playerIndex;
     public InputUser InputUserInfo { get; set; }
     public Gamepad Device { get; set; }
-    public bool IsAvailable { get; set; }
-    public List<int> DeviceIdList = new List<int>();
+    public int CurrentDeviceId { get; set; }
 
-    public InputUserAndGamepad(InputUser inputUserInfo, Gamepad gamepad, int deviceId, bool isAvailable, int playerIndex)
+
+    private InputControls _currnetController;
+    public InputControls CurrnetController
     {
-        IsAvailable = isAvailable;
+        get
+        {
+            return _currnetController;
+        }
+        set
+        {
+            _currnetController = value;
+            AssociateActions();
+        }
+    }
+
+    public InputUserAndGamepad(InputUser inputUserInfo, Gamepad gamepad, int deviceId, int playerIndex)
+    {
         InputUserInfo = inputUserInfo;
         Device = gamepad;
-        DeviceIdList.Add(deviceId);
+        CurrentDeviceId = deviceId;
         this.playerIndex = playerIndex;
     }
     public InputUserAndGamepad(InputUser inputUserInfo)
     {
         InputUserInfo = inputUserInfo;
         Device = null;
+        CurrentDeviceId = -1;
         this.playerIndex = -1;
-        IsAvailable = false;
     }
 
     public void TrySetDevice(Gamepad gamepad)
@@ -116,36 +141,40 @@ public class InputUserAndGamepad
         InputUser? v = InputUser.FindUserPairedToDevice(gamepad);
         if (v != null) return;
         Device = gamepad;
-        DeviceIdList.Add(Device.deviceId);
+        CurrentDeviceId = Device.deviceId;
         InputUserInfo = InputUser.PerformPairingWithDevice(gamepad, InputUserInfo);
-        IsAvailable = true;
-    }
-    // public void ReConnentDevice(Gamepad gamepad)
-    // {
-    //     if (IsAvailable) return;
+        AssociateActions();
 
-    //     InputUserInfo = InputUser.PerformPairingWithDevice(gamepad, InputUserInfo);
-    //     Device = gamepad;
-    //     IsAvailable = true;
-    //     DeviceId = gamepad.deviceId;
-    // }
+    }
+
+    public void TryReconnectDevice(Gamepad gamepad)
+    {
+        if (Device != null) return;
+        // InputUser? v = InputUser.FindUserPairedToDevice(gamepad);
+        // if (v != null) return;
+        Device = gamepad;
+        CurrentDeviceId = Device.deviceId;
+        InputUserInfo = InputUser.PerformPairingWithDevice(gamepad, InputUserInfo);
+        AssociateActions();
+
+    }
+
+    public void AssociateActions()
+    {
+        Debug.Log($"AssociateActions==playerIndex={playerIndex}");
+        if (_currnetController == null) return;
+        InputUserInfo.AssociateActionsWithUser(_currnetController);
+        _currnetController.Enable();
+    }
     public void RemoveDevice()
     {
-        InputUserInfo.UnpairDevice(Device);
+        CurrentDeviceId = -1;
         Device = null;
-        IsAvailable = false;
+        _currnetController.Disable();
     }
     public bool CheckDeviceById(int deviceid)
     {
-        foreach (var id in DeviceIdList)
-        {
-            if (id == deviceid)
-            {
-                return true;
-            }
-        }
-        return false;
-
+        return CurrentDeviceId == deviceid;
     }
 }
 
