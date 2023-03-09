@@ -4,8 +4,6 @@ using UnityEngine;
 
 public class SetScreenResolution : MonoBehaviour
 {
-    public float width;
-    public float height;
     /// <summary>
     /// Awake is called when the script instance is being loaded.
     /// </summary>
